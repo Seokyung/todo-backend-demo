@@ -1,3 +1,4 @@
+//여기서 서버 실행
 package com.example.demo;
 
 import org.springframework.boot.SpringApplication;
