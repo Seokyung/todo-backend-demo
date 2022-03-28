@@ -105,8 +105,7 @@ public class ToDoService {
 			throw new RuntimeException("Unknown user");
 		}
 	}
-	
-	/*
+		
 	//연습 코드
 	public String testService() {
 		//ToDoEntity 생성
@@ -120,5 +119,5 @@ public class ToDoService {
 		
 		return savedEntity.getTitle();
 	}
-	*/
+	
 }

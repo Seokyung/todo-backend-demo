@@ -3,6 +3,8 @@ package com.example.demo.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +30,9 @@ public class UserController {
 	@Autowired
 	private TokenProvider tokenProvider;
 	
+	//Bean으로 작성해도 됨
+	private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+	
 	//회원가입
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
@@ -36,7 +41,7 @@ public class UserController {
 			UserEntity user = UserEntity.builder()
 					.email(userDTO.getEmail())
 					.username(userDTO.getUsername())
-					.password(userDTO.getPassword())
+					.password(passwordEncoder.encode(userDTO.getPassword()))
 					.build();
 			//서비스를 이용해 리포지터리에 사용자 지정
 			UserEntity registeredUser = userService.create(user);
@@ -46,13 +51,13 @@ public class UserController {
 					.username(registeredUser.getUsername())
 					.build();
 			
-			return ResponseEntity.ok().body(responseUserDTO);
+			return ResponseEntity.ok(responseUserDTO);
 		} catch (Exception e) {
 			//사용자 정보는 항상 하나이므로 리스트를 만들어야 하는 ResponseDTO를 사용하지 않고 그냥 UserDTO 리턴
 			ResponseDTO responseDTO = ResponseDTO.builder().error(e.getMessage()).build();
 			return ResponseEntity
-					.badRequest()
-					.body(responseDTO);
+				.badRequest()
+				.body(responseDTO);
 		}
 	}
 	
@@ -61,7 +66,8 @@ public class UserController {
 	public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO) {
 		UserEntity user = userService.getByCredentials(
 				userDTO.getEmail(),
-				userDTO.getPassword());
+				userDTO.getPassword(),
+				passwordEncoder);
 		
 		if(user != null) {
 			//토큰 생성
